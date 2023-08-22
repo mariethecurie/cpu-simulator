@@ -1,13 +1,14 @@
 #ifndef CPU_H
 #define CPU_H
 
+#include "instruction.h"
 #include <map>
 #include <vector>
+#include <iostream>
 
 class CPU {
 public:
     CPU ();
-    ~CPU () {}
 
     void parse (const std::string& filename);
     void execute ();
@@ -21,17 +22,18 @@ public:
     void OR (const Instruction& i);
     void NOT (const Instruction& i);
     void CMP (const Instruction& i);
-
-    void printInstruction();
+    
     void dumpMemory ();
+//    void printInst ();
+//    void printReg ();
 
 private:
     std::map<std::string, int> labels;
     std::map<int, std::vector<std::string>> instructions;
     std::vector<Instruction> parsedInstructions;
-    std::map <Register, int8_t> registers;
+    std::map<Register, int> registers;
     std::map<Opcode, void(CPU::*)(const Instruction&)> ALU;
-    std::vector<int8_t> memory;
+    std::vector<int> memory;
 };
 
 #endif
