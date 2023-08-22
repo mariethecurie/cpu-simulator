@@ -2,9 +2,6 @@
 
 #include <fstream>
 #include <sstream>
-#include <map>
-#include <vector>
-#include "instruction.cpp"
 
 CPU::CPU () {
     // Initializing the ALU map with function pointers
@@ -27,9 +24,7 @@ CPU::CPU () {
     registers[Register::ZA] = 0;
     registers[Register::GH] = 0;
 
-    for (int i = 0; i < memory.size(); ++i) {
-        memory[i] = 0;
-    }
+    memory.resize(32);
 }
 
 void CPU::parse (const std::string& filename) {
@@ -59,10 +54,10 @@ void CPU::parse (const std::string& filename) {
         }
     }
 
-    int address = 0;
     for (const auto& pair : instructions) {
         Instruction instruction;
         std::vector<std::string> inst = pair.second;
+        inst[1].erase(inst[1].size() - 1);
         instruction.setOpcode(inst[0]);
         // Checking if the opcode is jump operation, so that the label will be replaced by the address
         if (instruction.opcode() == Opcode::JMP || instruction.opcode() == Opcode::JG
@@ -71,7 +66,7 @@ void CPU::parse (const std::string& filename) {
         }
         // Checking if the destination operand is memory address or register
         if (inst[1][0] == '[') {
-            instruction.setDestMem(static_cast<int>(inst[1][1]));
+            instruction.setDestMem(inst[1][1] - '0');
         } else {
             instruction.setDestReg(inst[1]);
         }
@@ -85,8 +80,7 @@ void CPU::parse (const std::string& filename) {
             }
         }
 
-        parsedInstructions[address] = instruction;
-        ++address;
+        parsedInstructions.push_back(instruction);
     }
 
     execute();
@@ -95,6 +89,7 @@ void CPU::parse (const std::string& filename) {
 }
 
 void CPU::execute () {
+
     registers[Register::GH] = 0;
 
     while (registers[Register::GH] < parsedInstructions.size()) {
@@ -138,7 +133,6 @@ void CPU::MOV (const Instruction& i) {
         registers[i.destReg()] = registers[i.srcReg()];
     }
 }
-
 void CPU::ADD (const Instruction& i) {
     if (i.isMem()) {
         if (i.isImm()){
@@ -234,17 +228,23 @@ void CPU::CMP (const Instruction& i) {
     }
 }
 
-void CPU::printInstruction() {
-   for (const auto& pair : instructions) {
-       std::cout << "Instruction Index: " << pair.first << std::endl;
-       const std::vector<std::string>& parts = pair.second;
-       for (const std::string& part : parts) {
-           std::cout << "  " << part << std::endl;
-       }
-   }
-}
 void CPU::dumpMemory () {
    for (int i = 0; i < memory.size(); ++i) {
-       std::cout << i << memory[i] << std::endl;
+       std::cout << i << ": " << memory[i] << std::endl;
    }
 }
+//void CPU::printInstruction() {
+//   for (const auto& pair : instructions) {
+//       std::cout << "Instruction Index: " << pair.first << std::endl;
+//       const std::vector<std::string>& parts = pair.second;
+//       for (const std::string& part : parts) {
+//           std::cout << "  " << part << std::endl;
+//       }
+//   }
+//}
+//void CPU::printReg () {
+//    std::cout << "Registers:" << std::endl;
+//    for (const auto& pair : registers) {
+//        std::cout << "Key: " << static_cast<int>(pair.first) << ", Value: " << pair.second << std::endl;
+//    }
+//}
