@@ -1,9 +1,11 @@
-#include "cpu.cpp"
+#include "cpu.h"
 
 int main () {
     CPU cpu;
     std::string filename = "instructions.txt";
     cpu.parse(filename);
-    cpu.printInstruction();
-    cpu.dumpMemory();
+
+//    cpu.printReg();
+//    cpu.printInstruction();
+//    cpu.dumpMemory();
 }
